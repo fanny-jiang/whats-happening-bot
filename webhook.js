@@ -3,9 +3,14 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const request = require('request')
+
+const apiai = require('apiai');
+
 const VERIFY_TOKEN = require('./tokens').VERIFY_TOKEN
 const PAGE_ACCESS_TOKEN = require('./tokens').PAGE_ACCESS_TOKEN
+const AI_CLIENT_ACCESS_TOKEN = require('.tokens').AI_CLIENT_ACCESS_TOKEN
 
+const apiaiApp = apiai(AI_CLIENT_ACCESS_TOKEN);
 const app = express();
 
 app.use(bodyParser.json());
@@ -47,19 +52,59 @@ function sendMessage(event) {
   let sender = event.sender.id;
   let text = event.message.text;
 
-  request({
-    url: 'https://graph.facebook.com/v2.6/me/messages',
-    qs: { access_token: PAGE_ACCESS_TOKEN },
-    method: 'POST',
-    json: {
-      recipient: { id: sender },
-      message: { text: text }
-    }
-  }, function (error, response) {
-    if (error) {
-      console.log('Error sending message: ', error);
-    } else if (response.body.error) {
-      console.log('Error: ', response.body.error);
-    }
+  let apiai = apiaiApp.textRequest(text, {
+    sessionId: 'greg_cat'
   });
+
+  apiai.on('response', (res) => {
+    let aiText = res.result.fulfillment.speech;
+
+    request({
+      url: 'https://graph.facebook.com/v2.6/me/messages',
+      qs: { access_token: PAGE_ACCESS_TOKEN },
+      method: 'POST',
+      json: {
+        recipient: { id: sender },
+        message: { text: aiText }
+      }
+    }, (err, res) => {
+      if (err) {
+        console.log('Error sending message: ', err);
+      } else {
+        console.log('Error: ', res.body.error);
+      }
+    });
+  });
+
+  apiai.on('error', (err) => {
+    console.log(error);
+  });
+
+  apiai.end();
+
 }
+
+
+
+/* echo sent message */
+
+// function sendMessage(event) {
+//   let sender = event.sender.id;
+//   let text = event.message.text;
+
+//   request({
+//     url: 'https://graph.facebook.com/v2.6/me/messages',
+//     qs: { access_token: PAGE_ACCESS_TOKEN },
+//     method: 'POST',
+//     json: {
+//       recipient: { id: sender },
+//       message: { text: text }
+//     }
+//   }, function (err, res) {
+//     if (err) {
+//       console.log('Error sending message: ', err);
+//     } else if (res.body.err) {
+//       console.log('Error: ', res.body.err);
+//     }
+//   });
+// }
