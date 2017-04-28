@@ -8,7 +8,7 @@ const apiai = require('apiai');
 
 const VERIFY_TOKEN = require('./tokens').VERIFY_TOKEN
 const PAGE_ACCESS_TOKEN = require('./tokens').PAGE_ACCESS_TOKEN
-const AI_CLIENT_ACCESS_TOKEN = require('.tokens').AI_CLIENT_ACCESS_TOKEN
+const AI_CLIENT_ACCESS_TOKEN = require('./tokens').AI_CLIENT_ACCESS_TOKEN
 
 const apiaiApp = apiai(AI_CLIENT_ACCESS_TOKEN);
 const app = express();
@@ -69,15 +69,13 @@ function sendMessage(event) {
       }
     }, (err, res) => {
       if (err) {
-        console.log('Error sending message: ', err);
-      } else {
-        console.log('Error: ', res.body.error);
+        console.log('Error sending message: ', res.body.error);
       }
     });
   });
 
   apiai.on('error', (err) => {
-    console.log(error);
+    console.log(err);
   });
 
   apiai.end();
