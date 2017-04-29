@@ -74,10 +74,14 @@ function sendMessage(event) {
 
   apiai.on('response', (res) => {
     // console.log('RES FROM AI HERE! LINE 76: ', res.result.fulfillment)
-    const aiRes = res.result.fulfillment,
-      aiText = aiRes.speech,
-      aiEventImgUrl = aiRes.data.imgUrl,
-      aiEventUrl = aiRes.data.eventUrl
+    const aiRes = res.result.fulfillment.data,
+      aiEventName = aiRes.eventName,
+      aiEventDesc = aiRes.eventDesc,
+      aiEventImgUrl = aiRes.imgUrl ? aiRes.imgUrl : '',
+      aiEventUrl = aiRes.eventUrl,
+      aiDateAndTime = aiRes.dateAndTime
+
+    console.log('AI RESPONSE IF ANY ITEMS ARE MISSING: ', aiRes)
     console.log('RES AI EVENT IMG URL', aiEventImgUrl)
     console.log('RES AI EVENT URL', aiEventUrl)
 
@@ -88,7 +92,17 @@ function sendMessage(event) {
       json: {
         recipient: { id: sender },
         message: {
-          text: aiText,
+          attachment: {
+            type: 'template',
+            payload: {
+              template_type: 'generic',
+              elements: [{
+                title: aiEventName,
+                image_url: aiEventImgUrl,
+                subtitle: aiEventDesc + '\n' + aiDateAndTime
+              }]
+            }
+          }
         }
       }
     }, (err, res) => {
@@ -169,8 +183,11 @@ app.post('/ai', (req, res) => {
 
         return res.json({
           speech: msg,
-          displayText: msg,
+          // displayText: msg,
           data: {
+            eventName: eventName,
+            eventDesc: eventDesc,
+            dateAndTime: dateAndTime,
             eventUrl: eventUrl,
             imgUrl: imgUrl
           },
