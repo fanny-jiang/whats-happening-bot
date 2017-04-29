@@ -73,7 +73,13 @@ function sendMessage(event) {
   });
 
   apiai.on('response', (res) => {
-    let aiText = res.result.fulfillment.speech;
+    // console.log('RES FROM AI HERE! LINE 76: ', res.result.fulfillment)
+    const aiRes = res.result.fulfillment,
+      aiText = aiRes.speech,
+      aiEventImgUrl = aiRes.data.imgUrl,
+      aiEventUrl = aiRes.data.eventUrl
+    console.log('RES AI EVENT IMG URL', aiEventImgUrl)
+    console.log('RES AI EVENT URL', aiEventUrl)
 
     request({
       url: 'https://graph.facebook.com/v2.6/me/messages',
@@ -81,7 +87,9 @@ function sendMessage(event) {
       method: 'POST',
       json: {
         recipient: { id: sender },
-        message: { text: aiText }
+        message: {
+          text: aiText,
+        }
       }
     }, (err, res) => {
       if (err) {
@@ -146,13 +154,26 @@ app.post('/ai', (req, res) => {
     request.get(restURL, (err, response, body) => {
       // if no error, parse the json body
       if (!err && response.statusCode === 200) {
-        let json = JSON.parse(body);
-        let eventNameArr = json.events.map((event) => event.name.text);
-        console.log('WHAT IS EVENTBRITE RES?: ', getRandomEvent(eventNameArr, 0, eventNameArr.length));
-        let msg = getRandomEvent(eventNameArr, 0, eventNameArr.length)
+        const json = JSON.parse(body),
+          eventsArr = json.events.map((event) => event),
+          randomEvent = getRandomEvent(eventsArr, 0, eventsArr.length),
+          eventName = randomEvent.name.text,
+          eventDesc = randomEvent.description.text ? randomEvent.description.text.slice(0, 40) : '',
+          dateAndTime = randomEvent.start.local,
+          eventUrl = randomEvent.url,
+          imgUrl = randomEvent.logo ? randomEvent.logo.url : 'https://cdn.zapier.com/storage/developer/638ebef07f1e312e20ee45ddb7df6be5.128x128.png';
+
+        let msg = eventName + '\n' + eventDesc + '\n' + dateAndTime;
+        // console.log('WHAT IS EVENTBRITE RES?: ', randomEvent);
+
+
         return res.json({
           speech: msg,
           displayText: msg,
+          data: {
+            eventUrl: eventUrl,
+            imgUrl: imgUrl
+          },
           source: 'activity'
         });
       } else {
