@@ -4,18 +4,34 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const request = require('request')
 
-const apiai = require('apiai');
+// tokens
+const tokens = require('./tokens')
+// fb messenger
+const VERIFY_TOKEN = tokens.VERIFY_TOKEN
+const PAGE_ACCESS_TOKEN = tokens.PAGE_ACCESS_TOKEN
+// api.ai
+const AI_CLIENT_ACCESS_TOKEN = tokens.AI_CLIENT_ACCESS_TOKEN
+// eventbrite
+const EB_APP_KEY = tokens.EB_APP_KEY
+const EB_ANON_TOKEN = tokens.EB_ANON_TOKEN
+const EB_ACCESS_TOKEN = tokens.EB_ACCESS_TOKEN
 
-const VERIFY_TOKEN = require('./tokens').VERIFY_TOKEN
-const PAGE_ACCESS_TOKEN = require('./tokens').PAGE_ACCESS_TOKEN
-const AI_CLIENT_ACCESS_TOKEN = require('./tokens').AI_CLIENT_ACCESS_TOKEN
+// APIs
+const apiai = require('apiai')
+const Nbrite = require('nbrite')
 
-const apiaiApp = apiai(AI_CLIENT_ACCESS_TOKEN);
+const apiaiApp = apiai(AI_CLIENT_ACCESS_TOKEN)
+const nbrite = new Nbrite({ token: EB_ANON_TOKEN })
+
+
+// express app setup
 const app = express();
 
+// bodyparser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// server
 const server = app.listen(process.env.PORT || 8080, () => {
   console.log('server is listening on port %d in %s mode!', server.address().port, app.settings.env)
 })
@@ -82,14 +98,6 @@ function sendMessage(event) {
 
 }
 
-
-/* <----- eventful api -----> */
-
-
-// let restUrl = 'http://eventful.com/events?q=music' + '&l=' + city;
-
-
-
 /* echo sent message */
 
 // function sendMessage(event) {
@@ -112,3 +120,10 @@ function sendMessage(event) {
 //     }
 //   });
 // }
+
+
+/* <----- eventbrite api -----> */
+
+nbrite.get('/events/search', function (err, events) {
+  console.log(events)
+})
