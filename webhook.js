@@ -73,17 +73,37 @@ function sendMessage(event) {
   });
 
   apiai.on('response', (res) => {
-    // console.log('RES FROM AI HERE! LINE 76: ', res.result.fulfillment)
-    const aiRes = res.result.fulfillment.data,
-      aiEventName = aiRes.eventName,
-      aiEventDesc = aiRes.eventDesc,
-      aiEventImgUrl = aiRes.imgUrl ? aiRes.imgUrl : '',
-      aiEventUrl = aiRes.eventUrl,
-      aiDateAndTime = aiRes.dateAndTime
+    console.log('BROKEN??', res)
+    console.log('RES FROM AI HERE! WHATS BROKEN?: ', res.result.fulfillment)
 
-    console.log('AI RESPONSE IF ANY ITEMS ARE MISSING: ', aiRes)
-    console.log('RES AI EVENT IMG URL', aiEventImgUrl)
-    console.log('RES AI EVENT URL', aiEventUrl)
+    // IF MAKING SMALL TALK
+    let message = null;
+
+    if (res.result.action === 'activity') {
+      let aiRes = res.result.fulfillment.data,
+        aiEventName = aiRes.eventName ? aiRes.eventName : 'Event',
+        aiEventDesc = aiRes.eventDesc,
+        aiEventImgUrl = aiRes.imgUrl ? aiRes.imgUrl : '',
+        aiEventUrl = aiRes.eventUrl,
+        aiDateAndTime = aiRes.dateAndTime;
+      message = {
+        attachment: {
+          type: 'template',
+          payload: {
+            template_type: 'generic',
+            elements: [{
+              title: aiEventName,
+              image_url: aiEventImgUrl,
+              subtitle: aiEventDesc + '\n' + aiDateAndTime
+            }]
+          }
+        }
+      }
+    } else {
+      message = { text: res.result.fulfillment.speech, attachment: null };
+    }
+
+    console.log('DID I CHANGE MESSAGE?', message)
 
     request({
       url: 'https://graph.facebook.com/v2.6/me/messages',
@@ -91,19 +111,7 @@ function sendMessage(event) {
       method: 'POST',
       json: {
         recipient: { id: sender },
-        message: {
-          attachment: {
-            type: 'template',
-            payload: {
-              template_type: 'generic',
-              elements: [{
-                title: aiEventName,
-                image_url: aiEventImgUrl,
-                subtitle: aiEventDesc + '\n' + aiDateAndTime
-              }]
-            }
-          }
-        }
+        message: message
       }
     }, (err, res) => {
       if (err) {
@@ -146,9 +154,6 @@ function sendMessage(event) {
 
 /* <----- eventbrite api -----> */
 
-// nbrite.get('/events/search/category', function (err, events) {
-//   console.log(events)
-// })
 
 function getRandomEvent(arr, min, max) {
   let index = Math.floor(Math.random() * (max - min)) + min;
@@ -156,14 +161,13 @@ function getRandomEvent(arr, min, max) {
 }
 
 app.post('/ai', (req, res) => {
+
   if (req.body.result.action === 'activity') {
     console.log('WHAT\'S THE AI REQ.BODY?: ', req.body.result)
     let category = req.body.result.parameters.category;
     let city = req.body.result.parameters['geo-city'];
 
     let restURL = 'https://www.eventbriteapi.com/v3/events/search/?q=' + category + '&sort_by=date&location.address=' + city + '&location.within=5mi&token=' + EB_ANON_TOKEN
-
-    console.log('EVENTBRITE URL: ', restURL)
 
     request.get(restURL, (err, response, body) => {
       // if no error, parse the json body
@@ -172,18 +176,15 @@ app.post('/ai', (req, res) => {
           eventsArr = json.events.map((event) => event),
           randomEvent = getRandomEvent(eventsArr, 0, eventsArr.length),
           eventName = randomEvent.name.text,
-          eventDesc = randomEvent.description.text ? randomEvent.description.text.slice(0, 40) : '',
+          eventDesc = randomEvent.description.text ? randomEvent.description.text.slice(0, 50) : '',
           dateAndTime = randomEvent.start.local,
           eventUrl = randomEvent.url,
           imgUrl = randomEvent.logo ? randomEvent.logo.url : 'https://cdn.zapier.com/storage/developer/638ebef07f1e312e20ee45ddb7df6be5.128x128.png';
 
         let msg = eventName + '\n' + eventDesc + '\n' + dateAndTime;
-        // console.log('WHAT IS EVENTBRITE RES?: ', randomEvent);
-
 
         return res.json({
           speech: msg,
-          // displayText: msg,
           data: {
             eventName: eventName,
             eventDesc: eventDesc,
