@@ -83,6 +83,12 @@ function sendMessage(event) {
 }
 
 
+/* <----- eventful api -----> */
+
+
+// let restUrl = 'http://eventful.com/events?q=music' + '&l=' + city;
+
+
 
 /* echo sent message */
 

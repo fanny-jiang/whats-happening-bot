@@ -1,5 +1,5 @@
 {
-  "name": "activities-bot",
+  "name": "whats-happening-bot",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -12,6 +12,7 @@
     "apiai": "^4.0.2",
     "body-parser": "^1.17.1",
     "express": "^4.15.2",
+    "nbrite": "^0.2.0",
     "ngrok": "^2.2.6",
     "request": "^2.81.0"
   }
