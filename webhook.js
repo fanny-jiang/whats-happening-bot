@@ -124,6 +124,45 @@ function sendMessage(event) {
 
 /* <----- eventbrite api -----> */
 
-nbrite.get('/events/search', function (err, events) {
-  console.log(events)
+// nbrite.get('/events/search/category', function (err, events) {
+//   console.log(events)
+// })
+
+function getRandomEvent(arr, min, max) {
+  let index = Math.floor(Math.random() * (max - min)) + min;
+  return arr[index]
+}
+
+app.post('/ai', (req, res) => {
+  if (req.body.result.action === 'activity') {
+    console.log('WHAT\'S THE AI REQ.BODY?: ', req.body.result)
+    let category = req.body.result.parameters.category;
+    let city = req.body.result.parameters['geo-city'];
+
+    let restURL = 'https://www.eventbriteapi.com/v3/events/search/?q=' + category + '&sort_by=date&location.address=' + city + '&location.within=5mi&token=' + EB_ANON_TOKEN
+
+    console.log('EVENTBRITE URL: ', restURL)
+
+    request.get(restURL, (err, response, body) => {
+      // if no error, parse the json body
+      if (!err && response.statusCode === 200) {
+        let json = JSON.parse(body);
+        let eventNameArr = json.events.map((event) => event.name.text);
+        console.log('WHAT IS EVENTBRITE RES?: ', getRandomEvent(eventNameArr, 0, eventNameArr.length));
+        let msg = getRandomEvent(eventNameArr, 0, eventNameArr.length)
+        return res.json({
+          speech: msg,
+          displayText: msg,
+          source: 'activity'
+        });
+      } else {
+        return res.status(400).json({
+          status: {
+            code: 400,
+            errorType: 'NOT FOUND TEST'
+          }
+        })
+      }
+    })
+  }
 })
