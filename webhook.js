@@ -73,13 +73,14 @@ function sendMessage(event) {
   });
 
   apiai.on('response', (res) => {
-    console.log('BROKEN??', res)
+    // console.log('BROKEN??', res)
     console.log('RES FROM AI HERE! WHATS BROKEN?: ', res.result.fulfillment)
 
     // IF MAKING SMALL TALK
     let message = null;
 
-    if (res.result.action === 'activity') {
+    if (res.result.action === 'activity' && res.result.fulfillment.data) {
+      // if data was received from eventbrite
       let aiRes = res.result.fulfillment.data,
         aiEventName = aiRes.eventName ? aiRes.eventName : 'Event',
         aiEventDesc = aiRes.eventDesc,
@@ -100,7 +101,7 @@ function sendMessage(event) {
         }
       }
     } else {
-      message = { text: res.result.fulfillment.speech, attachment: null };
+      message = { text: 'I couldn\'t find any events! Please try another activity.', attachment: null };
     }
 
     console.log('DID I CHANGE MESSAGE?', message)
@@ -166,40 +167,47 @@ app.post('/ai', (req, res) => {
     console.log('WHAT\'S THE AI REQ.BODY?: ', req.body.result)
     let category = req.body.result.parameters.category;
     let city = req.body.result.parameters['geo-city'];
+    let state = req.body.result.parameters['geo-state-us'];
 
-    let restURL = 'https://www.eventbriteapi.com/v3/events/search/?q=' + category + '&sort_by=date&location.address=' + city + '&location.within=5mi&token=' + EB_ANON_TOKEN
+    let restURL = 'https://www.eventbriteapi.com/v3/events/search/?q=' + category + '&sort_by=date&location.address=' + city + state + '&location.within=5mi&token=' + EB_ANON_TOKEN
+
+    // console.log('WHAT\'S THE URL??: ', restURL)
 
     request.get(restURL, (err, response, body) => {
       // if no error, parse the json body
       if (!err && response.statusCode === 200) {
-        const json = JSON.parse(body),
-          eventsArr = json.events.map((event) => event),
-          randomEvent = getRandomEvent(eventsArr, 0, eventsArr.length),
-          eventName = randomEvent.name.text,
-          eventDesc = randomEvent.description.text ? randomEvent.description.text.slice(0, 50) : '',
-          dateAndTime = randomEvent.start.local,
-          eventUrl = randomEvent.url,
-          imgUrl = randomEvent.logo ? randomEvent.logo.url : 'https://cdn.zapier.com/storage/developer/638ebef07f1e312e20ee45ddb7df6be5.128x128.png';
+        const json = JSON.parse(body);
+        // if events are found
+        if (json.events.length > 0) {
+          const eventsArr = json.events.map((event) => event),
+            randomEvent = getRandomEvent(eventsArr, 0, eventsArr.length),
+            eventName = randomEvent.name.text,
+            eventDesc = randomEvent.description.text ? randomEvent.description.text.slice(0, 50) : '',
+            dateAndTime = randomEvent.start.local,
+            eventUrl = randomEvent.url,
+            imgUrl = randomEvent.logo ? randomEvent.logo.url : 'https://cdn.zapier.com/storage/developer/638ebef07f1e312e20ee45ddb7df6be5.128x128.png';
 
-        let msg = eventName + '\n' + eventDesc + '\n' + dateAndTime;
+          let msg = eventName + '\n' + eventDesc + '\n' + dateAndTime;
 
-        return res.json({
-          speech: msg,
-          data: {
-            eventName: eventName,
-            eventDesc: eventDesc,
-            dateAndTime: dateAndTime,
-            eventUrl: eventUrl,
-            imgUrl: imgUrl
-          },
-          source: 'activity'
-        });
+          return res.json({
+            speech: msg,
+            data: {
+              eventName: eventName,
+              eventDesc: eventDesc,
+              dateAndTime: dateAndTime,
+              eventUrl: eventUrl,
+              imgUrl: imgUrl
+            },
+            source: 'activity'
+          });
+        }
       } else {
         return res.status(400).json({
           status: {
             code: 400,
             errorType: 'NOT FOUND TEST'
-          }
+          },
+          data: null
         })
       }
     })
