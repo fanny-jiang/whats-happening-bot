@@ -70,7 +70,7 @@ function sendMessage(event) {
   });
 
   apiai.on('response', (res) => {
-    console.log('RESPONSE FROM EVENTBRITE: ', res.result)
+    // console.log('RESPONSE FROM EVENTBRITE: ', res.result)
 
     // IF MAKING SMALL TALK
     let message = null;
