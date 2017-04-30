@@ -4,8 +4,8 @@ A messenger bot that suggests events based on location for you to check out! Thi
 
 ## Getting Started
 
-What's Happening Bot is still in developer mode currently, but when it is approved by Facebook,
-simply go to [](https://www.messenger.com/t/whatshappeningbot) and start chatting with the bot!
+**NOTE:** What's Happening Bot is still currently in developer mode, but when it is approved by Facebook,
+simply go to [messenger.com/whatshappeningbot](https://www.messenger.com/t/whatshappeningbot) and start chatting with the bot!
 
 ## Prerequisites
 
