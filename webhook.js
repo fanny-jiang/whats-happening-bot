@@ -8,15 +8,10 @@ const convertDateTime = require('./utilities').convertDateTime
 
 // tokens
 const tokens = require('./tokens')
-// fb messenger
 const VERIFY_TOKEN = tokens.VERIFY_TOKEN
 const PAGE_ACCESS_TOKEN = tokens.PAGE_ACCESS_TOKEN
-// api.ai
 const AI_CLIENT_ACCESS_TOKEN = tokens.AI_CLIENT_ACCESS_TOKEN
-// eventbrite
-const EB_APP_KEY = tokens.EB_APP_KEY
 const EB_ANON_TOKEN = tokens.EB_ANON_TOKEN
-const EB_ACCESS_TOKEN = tokens.EB_ACCESS_TOKEN
 
 // APIs
 const apiai = require('apiai')
@@ -75,8 +70,7 @@ function sendMessage(event) {
   });
 
   apiai.on('response', (res) => {
-    // console.log('BROKEN??', res)
-    console.log('RES FROM AI HERE! WHATS BROKEN?: ', res.result.fulfillment)
+    console.log('RESPONSE FROM EVENTBRITE: ', res.result)
 
     // IF MAKING SMALL TALK
     let message = null;
@@ -111,7 +105,7 @@ function sendMessage(event) {
       message = { text: res.result.fulfillment.speech, attachment: null };
     }
 
-    console.log('DID I CHANGE MESSAGE?', message)
+    // console.log('OUTPUT MESSAGE', message)
 
     request({
       url: 'https://graph.facebook.com/v2.6/me/messages',
@@ -165,20 +159,20 @@ function sendMessage(event) {
 app.post('/ai', (req, res) => {
 
   if (req.body.result.action === 'activity') {
-    console.log('WHAT\'S THE AI REQ.BODY?: ', req.body.result)
+    // console.log('REQ.BODY FROM EVENTBRITE: ', req.body.result)
     let category = req.body.result.parameters.category;
     let city = req.body.result.parameters['geo-city'];
     let state = req.body.result.parameters['geo-state-us'];
 
-    let restURL = 'https://www.eventbriteapi.com/v3/events/search/?q=' + category + '&sort_by=date&location.address=' + city + state + '&location.within=5mi&token=' + EB_ANON_TOKEN
+    let restURL = 'https://www.eventbriteapi.com/v3/events/search/?q=' + category + '&sort_by=date&location.address=' + city + state + '&location.within=5mi&token=' + EB_ANON_TOKEN;
 
-    // console.log('WHAT\'S THE URL??: ', restURL)
+    // console.log('RESTURL: ', restURL)
 
     request.get(restURL, (err, response, body) => {
       // if no error, parse the json body
       if (!err && response.statusCode === 200) {
         const json = JSON.parse(body);
-        // if events are found
+        // if events are returned
         if (json.events.length > 0) {
           const eventsArr = json.events.map((event) => event),
             randomEvent = getRandomEvent(eventsArr, 0, eventsArr.length),
@@ -189,10 +183,11 @@ app.post('/ai', (req, res) => {
             eventUrl = randomEvent.url,
             imgUrl = randomEvent.logo ? randomEvent.logo.url : 'https://cdn.zapier.com/storage/developer/638ebef07f1e312e20ee45ddb7df6be5.128x128.png';
 
-          console.log('SELECTED EVENT RESULT: ', randomEvent)
+          // console.log('SELECTED EVENT RESULT: ', randomEvent)
 
           let msg = eventName + '\n' + eventDesc + '\n' + dateAndTime;
 
+          // send selected data as json body to AI to post to chat bot
           return res.json({
             speech: msg,
             data: {
