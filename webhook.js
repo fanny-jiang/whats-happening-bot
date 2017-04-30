@@ -3,6 +3,8 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const request = require('request')
+const getRandomEvent = require('./utilities').getRandomEvent
+const convertDateTime = require('./utilities').convertDateTime
 
 // tokens
 const tokens = require('./tokens')
@@ -86,7 +88,8 @@ function sendMessage(event) {
         aiEventDesc = aiRes.eventDesc,
         aiEventImgUrl = aiRes.imgUrl ? aiRes.imgUrl : '',
         aiEventUrl = aiRes.eventUrl,
-        aiDateAndTime = aiRes.dateAndTime;
+        aiDateAndTime = convertDateTime(aiRes.dateAndTime),
+        aiIsFree = aiRes.isFree;
       message = {
         attachment: {
           type: 'template',
@@ -95,7 +98,7 @@ function sendMessage(event) {
             elements: [{
               title: aiEventName,
               image_url: aiEventImgUrl,
-              subtitle: aiEventDesc + '\n' + aiDateAndTime,
+              subtitle: aiEventDesc + '\n' + aiIsFree + '\n' + aiDateAndTime,
               default_action: {
                 type: 'web_url',
                 url: aiEventUrl
@@ -105,7 +108,7 @@ function sendMessage(event) {
         }
       }
     } else {
-      message = { text: 'I couldn\'t find any events! Please try another activity.', attachment: null };
+      message = { text: res.result.fulfillment.speech, attachment: null };
     }
 
     console.log('DID I CHANGE MESSAGE?', message)
@@ -159,12 +162,6 @@ function sendMessage(event) {
 
 /* <----- eventbrite api -----> */
 
-
-function getRandomEvent(arr, min, max) {
-  let index = Math.floor(Math.random() * (max - min)) + min;
-  return arr[index]
-}
-
 app.post('/ai', (req, res) => {
 
   if (req.body.result.action === 'activity') {
@@ -186,10 +183,13 @@ app.post('/ai', (req, res) => {
           const eventsArr = json.events.map((event) => event),
             randomEvent = getRandomEvent(eventsArr, 0, eventsArr.length),
             eventName = randomEvent.name.text,
-            eventDesc = randomEvent.description.text ? randomEvent.description.text.slice(0, 50) : '',
+            eventDesc = randomEvent.description.text ? randomEvent.description.text.slice(0, 45) + '...' : '',
             dateAndTime = randomEvent.start.local,
+            isFree = randomEvent.is_free ? 'Free' : 'Get tickets',
             eventUrl = randomEvent.url,
             imgUrl = randomEvent.logo ? randomEvent.logo.url : 'https://cdn.zapier.com/storage/developer/638ebef07f1e312e20ee45ddb7df6be5.128x128.png';
+
+          console.log('SELECTED EVENT RESULT: ', randomEvent)
 
           let msg = eventName + '\n' + eventDesc + '\n' + dateAndTime;
 
@@ -199,6 +199,7 @@ app.post('/ai', (req, res) => {
               eventName: eventName,
               eventDesc: eventDesc,
               dateAndTime: dateAndTime,
+              isFree: isFree,
               eventUrl: eventUrl,
               imgUrl: imgUrl
             },
@@ -217,3 +218,4 @@ app.post('/ai', (req, res) => {
     })
   }
 })
+
