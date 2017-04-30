@@ -12,7 +12,7 @@ const VERIFY_TOKEN = tokens.VERIFY_TOKEN,
   PAGE_ACCESS_TOKEN = tokens.PAGE_ACCESS_TOKEN,
   AI_CLIENT_ACCESS_TOKEN = tokens.AI_CLIENT_ACCESS_TOKEN,
   AI_SESSION_ID = tokens.AI_SESSION_ID,
-  EB_ANON_TOKEN = tokens.EB_ANON_TOKEN,
+  EB_ANON_TOKEN = tokens.EB_ANON_TOKEN
 
 // APIs
 const apiai = require('apiai')
