@@ -95,7 +95,11 @@ function sendMessage(event) {
             elements: [{
               title: aiEventName,
               image_url: aiEventImgUrl,
-              subtitle: aiEventDesc + '\n' + aiDateAndTime
+              subtitle: aiEventDesc + '\n' + aiDateAndTime,
+              default_action: {
+                type: 'web_url',
+                url: aiEventUrl
+              }
             }]
           }
         }
