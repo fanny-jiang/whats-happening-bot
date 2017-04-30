@@ -1,3 +1,5 @@
+'use strict'
+
 function getRandomEvent(arr, min, max) {
   let index = Math.floor(Math.random() * (max - min)) + min;
   return arr[index]
