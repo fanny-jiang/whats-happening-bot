@@ -4,7 +4,7 @@
   "description": "Facebook messenger chat bot that suggests events",
   "main": "webhook.js",
   "scripts": {
-    "start": "nf start",
+    "start": "node webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
