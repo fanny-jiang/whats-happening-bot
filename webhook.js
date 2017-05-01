@@ -77,7 +77,7 @@ function sendMessage(event) {
   });
 
   apiai.on('response', (res) => {
-    // console.log('RESPONSE FROM EVENTBRITE: ', res.result)
+    console.log('RESPONSE FROM EVENTBRITE: ', res.result)
     console.log('RESPONSE FROM SERVER WITH SINGLE EVENT THAT GETS SENT TO FB: COUNTER=', counter++)
 
     let message = null;
