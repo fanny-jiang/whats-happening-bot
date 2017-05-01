@@ -1,5 +1,7 @@
 'use strict'
 
+let counter = 0;
+
 const express = require('express')
 const bodyParser = require('body-parser')
 const request = require('request')
@@ -47,17 +49,21 @@ app.get('/webhook', (req, res) => {
   }
 });
 
-// post request to webhook with response from API.ai
+// post request to webhook
 
 app.post('/webhook', (req, res) => {
+  // User's text is received
+  console.log('1ST COUNTER FROM APP.POST/WEBHOOK: ', counter++);
   if (req.body.object === 'page') {
     req.body.entry.forEach((entry) => {
       entry.messaging.forEach((event) => {
         if (event.message && event.message.text) {
+          console.log('3RD COUNTER FROM APP.POST/WEBHOOK', counter++)
           sendMessage(event);
         }
       })
     })
+    console.log('2ND COUNTER FROM APP.POST/WEBHOOK', counter++)
     res.status(200).end()
   }
 })
@@ -72,6 +78,7 @@ function sendMessage(event) {
 
   apiai.on('response', (res) => {
     // console.log('RESPONSE FROM EVENTBRITE: ', res.result)
+    console.log('RESPONSE FROM SERVER WITH SINGLE EVENT THAT GETS SENT TO FB: COUNTER=', counter++)
 
     let message = null;
 
@@ -79,11 +86,12 @@ function sendMessage(event) {
     if (res.result.action === 'activity' && res.result.fulfillment.data) {
       let aiRes = res.result.fulfillment.data,
         aiEventName = aiRes.eventName ? aiRes.eventName : 'Event',
-        aiEventDesc = aiRes.eventDesc,
+        aiEventDesc = aiRes.eventDesc ? aiRes.eventDesc : '',
         aiEventImgUrl = aiRes.imgUrl ? aiRes.imgUrl : '',
         aiEventUrl = aiRes.eventUrl,
         aiDateAndTime = convertDateTime(aiRes.dateAndTime),
         aiIsFree = aiRes.isFree;
+
       message = {
         attachment: {
           type: 'template',
@@ -158,11 +166,12 @@ function sendMessage(event) {
 
 /* <----- Eventbrite api -----> */
 
-// POST request to API.ai with data from Eventbrite event results
+// POST request to API.ai with user's text from FB messenger
 app.post('/ai', (req, res) => {
-
+  // response back from API.ai
   if (req.body.result.action === 'activity') {
     // console.log('REQ.BODY FROM EVENTBRITE: ', req.body.result)
+    console.log('REQ.BODY FROM AI AFTER ANALYZING INTENTS: COUNTER = ', counter++)
     let category = req.body.result.parameters.category;
     let city = req.body.result.parameters['geo-city'];
     let state = req.body.result.parameters['geo-state-us'];
@@ -175,6 +184,7 @@ app.post('/ai', (req, res) => {
       // if no error, parse the json body
       if (!err && response.statusCode === 200) {
         const json = JSON.parse(body);
+        console.log('RESPONSE FROM EVENTBRITE WITH EVENTS: COUNTER = ', counter++)
         // if events are returned
         if (json.events.length > 0) {
           const eventsArr = json.events.map((event) => event),
@@ -216,4 +226,6 @@ app.post('/ai', (req, res) => {
     })
   }
 })
+
+counter = 0
 
