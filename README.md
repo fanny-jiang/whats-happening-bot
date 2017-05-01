@@ -5,7 +5,7 @@ A messenger bot that suggests events based on location for you to check out! Thi
 ## Getting Started
 
 **NOTE:** What's Happening Bot is still currently in developer mode, but when it is approved by Facebook,
-simply go to [messenger.com/whatshappeningEVE](https://www.messenger.com/t/whatshappeningEVE) and start chatting with the bot!
+simply go to [m.me/whatshappeningEVE](m.me/whatshappeningEVE) and start chatting with the bot!
 
 Be sure to check out my [Medium](https://medium.com/@heygirlcode) blog, where I'll be posting a tutorial on how to build this bot.
 
