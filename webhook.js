@@ -172,13 +172,32 @@ app.post('/ai', (req, res) => {
   if (req.body.result.action === 'activity') {
     // console.log('REQ.BODY FROM EVENTBRITE: ', req.body.result)
     console.log('REQ.BODY FROM AI AFTER ANALYZING INTENTS: COUNTER = ', counter++)
-    let category = req.body.result.parameters.category;
+    let activity = req.body.result.parameters.category;
     let city = req.body.result.parameters['geo-city'];
     let state = req.body.result.parameters['geo-state-us'];
+    let category;
+    switch (activity) {
+      case 'concert':
+      case 'concerts':
+      case 'live band':
+      case 'music':
+      case 'live show':
+      case 'band':
+        category = '103'
+        break;
+      case 'play':
+        category = '105'
+        break;
+      case 'movie':
+        category = '104'
+        break;
+      default:
+        category = ''
+    }
 
-    let restURL = 'https://www.eventbriteapi.com/v3/events/search/?q=' + category + '&sort_by=date&location.address=' + city + state + '&location.within=5mi&token=' + EB_ANON_TOKEN;
+    let restURL = 'https://www.eventbriteapi.com/v3/events/search/?q=' + activity + '&sort_by=date&location.address=' + city + state + '&location.within=5mi&categories=' + category + '&token=' + EB_ANON_TOKEN;
 
-    // console.log('RESTURL: ', restURL)
+    console.log('RESTURL: ', restURL)
 
     request.get(restURL, (err, response, body) => {
       // if no error, parse the json body
