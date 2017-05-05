@@ -1,7 +1,5 @@
 'use strict'
 
-let counter = 0;
-
 const express = require('express')
 const bodyParser = require('body-parser')
 const request = require('request')
@@ -32,6 +30,10 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
 // server
+app.get('/', function (req, res) {
+  res.send('Deployed!');
+});
+
 const server = app.listen(process.env.PORT || 8080, () => {
   console.log('server is listening on port %d in %s mode!', server.address().port, app.settings.env)
 })
