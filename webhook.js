@@ -3,6 +3,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const request = require('request')
+const path = require('path')
 const getRandomEvent = require('./utilities').getRandomEvent
 const convertDateTime = require('./utilities').convertDateTime
 
@@ -30,7 +31,7 @@ app.get('/', function (req, res) {
 });
 
 app.get('/privacy', function (req, res) {
-  res.send('./index.html')
+  res.sendFile(path.join(__dirname, '/index.html'));
 })
 
 
