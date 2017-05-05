@@ -29,6 +29,10 @@ app.get('/', function (req, res) {
   res.send('Deployed!');
 });
 
+app.get('/privacy', function (req, res) {
+  res.send('./index.html')
+})
+
 
 /*<--- FB Webhook Setup--->*/
 
