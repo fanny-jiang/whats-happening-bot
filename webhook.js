@@ -18,8 +18,8 @@ const VERIFY_TOKEN = tokens.VERIFY_TOKEN,
 const apiai = require('apiai')
 const Nbrite = require('nbrite')
 
-const apiaiApp = apiai(AI_CLIENT_ACCESS_TOKEN)
-const nbrite = new Nbrite({ token: EB_ANON_TOKEN })
+const apiaiApp = apiai(process.env.AI_CLIENT_ACCESS_TOKEN)
+const nbrite = new Nbrite({ token: process.env.EB_ANON_TOKEN })
 
 
 // express app setup
@@ -42,7 +42,7 @@ const server = app.listen(process.env.PORT || 8080, () => {
 
 // get request to webhook
 app.get('/webhook', (req, res) => {
-  if (req.query['hub.mode'] && req.query['hub.verify_token'] === VERIFY_TOKEN) {
+  if (req.query['hub.mode'] && req.query['hub.verify_token'] === process.env.VERIFY_TOKEN) {
     console.log('Validating webhook')
     res.status(200).send(req.query['hub.challenge'])
   } else {
@@ -55,17 +55,14 @@ app.get('/webhook', (req, res) => {
 
 app.post('/webhook', (req, res) => {
   // User's text is received
-  console.log('1ST COUNTER FROM APP.POST/WEBHOOK: ', counter++);
   if (req.body.object === 'page') {
     req.body.entry.forEach((entry) => {
       entry.messaging.forEach((event) => {
         if (event.message && event.message.text) {
-          console.log('3RD COUNTER FROM APP.POST/WEBHOOK', counter++)
           sendMessage(event);
         }
       })
     })
-    console.log('2ND COUNTER FROM APP.POST/WEBHOOK', counter++)
     res.status(200).end()
   }
 })
@@ -75,12 +72,10 @@ function sendMessage(event) {
   let text = event.message.text
 
   let apiai = apiaiApp.textRequest(text, {
-    sessionId: AI_SESSION_ID
+    sessionId: process.env.AI_SESSION_ID
   });
 
   apiai.on('response', (res) => {
-    console.log('RESPONSE FROM EVENTBRITE: ', res.result)
-    console.log('RESPONSE FROM SERVER WITH SINGLE EVENT THAT GETS SENT TO FB: COUNTER=', counter++)
 
     let message = null;
 
@@ -116,12 +111,10 @@ function sendMessage(event) {
       message = { text: res.result.fulfillment.speech, attachment: null };
     }
 
-    // console.log('OUTPUT MESSAGE', message)
-
     // send json object containing message to FB messenger post request
     request({
       url: 'https://graph.facebook.com/v2.6/me/messages',
-      qs: { access_token: PAGE_ACCESS_TOKEN },
+      qs: { access_token: process.env.PAGE_ACCESS_TOKEN },
       method: 'POST',
       json: {
         recipient: { id: sender },
@@ -150,7 +143,7 @@ function sendMessage(event) {
 
 //   request({
 //     url: 'https://graph.facebook.com/v2.6/me/messages',
-//     qs: { access_token: PAGE_ACCESS_TOKEN },
+//     qs: { access_token: process.env.PAGE_ACCESS_TOKEN },
 //     method: 'POST',
 //     json: {
 //       recipient: { id: sender },
@@ -172,8 +165,6 @@ function sendMessage(event) {
 app.post('/ai', (req, res) => {
   // response back from API.ai
   if (req.body.result.action === 'activity') {
-    // console.log('REQ.BODY FROM EVENTBRITE: ', req.body.result)
-    console.log('REQ.BODY FROM AI AFTER ANALYZING INTENTS: COUNTER = ', counter++)
     let activity = req.body.result.parameters.category;
     let city = req.body.result.parameters['geo-city'];
     let state = req.body.result.parameters['geo-state-us'];
@@ -197,7 +188,7 @@ app.post('/ai', (req, res) => {
         category = ''
     }
 
-    let restURL = 'https://www.eventbriteapi.com/v3/events/search/?q=' + activity + '&sort_by=date&location.address=' + city + state + '&location.within=5mi&categories=' + category + '&token=' + EB_ANON_TOKEN;
+    let restURL = 'https://www.eventbriteapi.com/v3/events/search/?q=' + activity + '&sort_by=date&location.address=' + city + state + '&location.within=5mi&categories=' + category + '&token=' + process.env.EB_ANON_TOKEN;
 
     console.log('RESTURL: ', restURL)
 
@@ -205,7 +196,6 @@ app.post('/ai', (req, res) => {
       // if no error, parse the json body
       if (!err && response.statusCode === 200) {
         const json = JSON.parse(body);
-        console.log('RESPONSE FROM EVENTBRITE WITH EVENTS: COUNTER = ', counter++)
         // if events are returned
         if (json.events.length > 0) {
           const eventsArr = json.events.map((event) => event),
@@ -217,7 +207,6 @@ app.post('/ai', (req, res) => {
             eventUrl = randomEvent.url,
             imgUrl = randomEvent.logo ? randomEvent.logo.url : 'https://cdn.zapier.com/storage/developer/638ebef07f1e312e20ee45ddb7df6be5.128x128.png';
 
-          // console.log('SELECTED EVENT RESULT: ', randomEvent)
 
           let msg = eventName + '\n' + eventDesc + '\n' + dateAndTime;
 
@@ -248,5 +237,4 @@ app.post('/ai', (req, res) => {
   }
 })
 
-counter = 0
 
