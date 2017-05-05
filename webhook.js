@@ -6,14 +6,6 @@ const request = require('request')
 const getRandomEvent = require('./utilities').getRandomEvent
 const convertDateTime = require('./utilities').convertDateTime
 
-// Tokens
-const tokens = require('./tokens')
-const VERIFY_TOKEN = tokens.VERIFY_TOKEN,
-  PAGE_ACCESS_TOKEN = tokens.PAGE_ACCESS_TOKEN,
-  AI_CLIENT_ACCESS_TOKEN = tokens.AI_CLIENT_ACCESS_TOKEN,
-  AI_SESSION_ID = tokens.AI_SESSION_ID,
-  EB_ANON_TOKEN = tokens.EB_ANON_TOKEN
-
 // APIs
 const apiai = require('apiai')
 const Nbrite = require('nbrite')
@@ -30,13 +22,13 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
 // server
+
+app.listen((process.env.PORT || 8080));
+
 app.get('/', function (req, res) {
   res.send('Deployed!');
 });
 
-const server = app.listen(process.env.PORT || 8080, () => {
-  console.log('server is listening on port %d in %s mode!', server.address().port, app.settings.env)
-})
 
 /*<--- FB Webhook Setup--->*/
 
