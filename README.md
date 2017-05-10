@@ -73,8 +73,8 @@ ngrok http 8080     // sets up temporary webhook endpoint at port 8080
     1.  `heroku git:remote your-app-name` You'll need to be a collaborator on the app.
 
 4. Save your app tokens as [environment variables](https://devcenter.heroku.com/articles/config-vars#setting-up-config-vars-for-a-deployed-application):
-    `$ heroku config:set YOUR_SECRET_TOKEN=secret_token` to set your config variables`
-    `$ heroku config` to view your config variables`
+    `$ heroku config:set YOUR_SECRET_TOKEN=secret_token` to set your config variables
+    `$ heroku config` to view your config variables
 5. Add a `Procfile` to your root directory. The file should be named `Procfile` exactly and contain:
 `web: node webhook.js`, which indicates process type: web, and it takes a node command to start the app.
 6. Deploy! `npm run deploy-heroku`
