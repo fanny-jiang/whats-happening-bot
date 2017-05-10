@@ -4,10 +4,9 @@ A messenger bot that suggests events based on location for you to check out! Thi
 
 ## Getting Started
 
-**NOTE:** What's Happening Bot is still currently in developer mode, but when it is approved by Facebook,
-simply go to [m.me/whatshappeningEVE](m.me/whatshappeningEVE) and start chatting with the bot!
+Chat with Eve today! [m.me/whatshappeningEVE](m.me/whatshappeningEVE)
 
-Be sure to check out my [Medium](https://medium.com/@heygirlcode) blog, where I'll be posting a tutorial on how to build this bot.
+Be sure to check out my [Medium](https://medium.com/@heygirlcode) blog, where I'll be posting a tutorial on how I built this bot.
 
 ## Prerequisites
 
@@ -61,9 +60,28 @@ node webhook        // or use nodemon to have it watch for file changes
 ngrok http 8080     // sets up temporary webhook endpoint at port 8080
 ```
 
-## Deployment
+## Heroku Deployment
 
-Finally, deploy to heroku and remember to change the API callback url settings to your heroku url.
+1. Set up the [Heroku command line tools](https://devcenter.heroku.com/articles/heroku-cli) and install [Yarn](https://yarnpkg.com/en/) if you haven't already (`npm install -g yarn`)
+2. `heroku login`
+3. Add a git remote for heroku:
+  - **If you're creating a new app...**
+    1. `heroku create` or `heroku create your-app-name` if you have a name in mind.
+    2. `npm run deploy-heroku`. This will create a new branch and compile and commit your frontend JS to it, then push that branch to Heroku.
+
+  - **If you already have a Heroku app...**
+    1.  `heroku git:remote your-app-name` You'll need to be a collaborator on the app.
+
+4. Save your app tokens as [environment variables](https://devcenter.heroku.com/articles/config-vars#setting-up-config-vars-for-a-deployed-application):
+    `$ heroku config:set YOUR_SECRET_TOKEN=secret_token` to set your config variables`
+    `$ heroku config` to view your config variables`
+5. Add a `Procfile` to your root directory. The file should be named `Procfile` exactly and contain:
+`web: node webhook.js`, which indicates process type: web, and it takes a node command to start the app.
+6. Deploy! `npm run deploy-heroku`
+7. Remember to change the webhook URL in your Facebook app dashboard to your heroku app URL:
+`your-app.herokuapp.com/webhook` Facebook webhook
+`your-app.herokuapp.com/ai` API.ai webhook
+8. Have fun with it!
 
 ## Built With
 
@@ -83,4 +101,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgments
 
-* **Tomomi Imura** - [GitHub](https://github.com/girliemac/fb-apiai-bot-demo/tree/tutorial-01) - really awesome tutorial that helped me get started on the projected!
+* **Tomomi Imura** - [GitHub](https://github.com/girliemac/fb-apiai-bot-demo/tree/tutorial-01) - really awesome tutorial that helped me get started on the project!
