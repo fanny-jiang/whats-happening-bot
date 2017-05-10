@@ -44,11 +44,6 @@ Replace:
 "EB_ANON_TOKEN" with your Eventbrite Public OAuth token
 ```
 
-Install packages
-```
-npm install
-```
-
 ## Installing
 
 ```
@@ -59,6 +54,10 @@ Run node in one terminal and ngrok at port 8080 in another terminal
 node webhook        // or use nodemon to have it watch for file changes
 ngrok http 8080     // sets up temporary webhook endpoint at port 8080
 ```
+## Configure Webhooks
+
+- Configure Facebook Messenger webhook with your ngrok URL `https://67ba4dd5.ngrok.io/webhook` (you'll also need to enter your verify token from above)
+- Configure API.ai webhook with your ngrok URL `https://67ba4dd5.ngrok.io/ai`
 
 ## Heroku Deployment
 
@@ -101,4 +100,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgments
 
-* **Tomomi Imura** - [GitHub](https://github.com/girliemac/fb-apiai-bot-demo/tree/tutorial-01) - really awesome tutorial that helped me get started on the project!
+* **Tomomi Imura** - [Tutorial](http://www.girliemac.com/blog/2017/01/06/facebook-apiai-bot-nodejs/) [GitHub](https://github.com/girliemac/fb-apiai-bot-demo/tree/tutorial-01) - really awesome tutorial that helped me get started on the project!
